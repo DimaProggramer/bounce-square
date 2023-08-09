@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colliding Square</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            background-color: #000;
+            overflow: hidden;
+            color: white;
+        }
+
+        #info {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        #telegramIcon, #githubIcon {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+
+        canvas {
+            border: 2px solid green;
+            width: 100vw;
+            height: 56.25vw;
+            margin-top: 10px;
+        }
+
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        #speedInput {
+            margin-right: 10px;
+        }
+
+        #applyButton {
+            background-color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <img src="tg.jpeg" id="telegramIcon" alt="Telegram Icon">:<span>@HelloBiden</span>
+    </div>
+    <div id="info">
+        <img src="git.png" id="githubIcon" alt="GitHub Icon">:<span>DimaProggramer</span>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="controls">
+        <input type="number" id="speedInput" placeholder="Enter speed" step="0.1" value="0.5">
+        <button id="applyButton">Apply Speed</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const speedInput = document.getElementById('speedInput');
+        const applyButton = document.getElementById('applyButton');
+
+        canvas.width = window.innerWidth;
+        canvas.height = (window.innerWidth) * 0.5625;
+
+        const square = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: 20,
+            dx: 0.5,
+            dy: 0.5,
+        };
+
+        function getRandomRGBColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        function drawSquare() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = square.color;
+            ctx.fillRect(square.x, square.y, square.size, square.size);
+        }
+
+        function updatePosition() {
+            square.x += square.dx;
+            square.y += square.dy;
+
+            if (square.x + square.size > canvas.width || square.x < 0) {
+                square.dx = -square.dx;
+                square.color = getRandomRGBColor();
+            }
+
+            if (square.y + square.size > canvas.height || square.y < 0) {
+                square.dy = -square.dy;
+                square.color = getRandomRGBColor();
+            }
+
+            drawSquare();
+            requestAnimationFrame(updatePosition);
+        }
+
+        updatePosition();
+
+        applyButton.addEventListener('click', () => {
+            const speed = parseFloat(speedInput.value);
+
+            if (!isNaN(speed)) {
+                square.dx = speed;
+                square.dy = speed;
+            } else {
+                alert('Invalid speed value.');
+            }
+        });
+    </script>
+</body>
+</html>
