@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colliding Square</title>
+    <title>Столкновение квадрата</title>
     <style>
         body {
             margin: 0;
@@ -17,7 +17,7 @@
             color: white;
         }
 
-        #info {
+        #infoTelegram, #infoGitHub {
             margin-top: 20px;
             display: flex;
             align-items: center;
@@ -30,7 +30,7 @@
         }
 
         canvas {
-            border: 2px solid green;
+            border: 3px solid green;
             width: 100vw;
             height: 56.25vw;
             margin-top: 10px;
@@ -44,90 +44,51 @@
 
         #speedInput {
             margin-right: 10px;
+            color: white;
         }
 
-        #applyButton {
+        #applyButton, #restartButton {
             background-color: white;
             border: none;
             padding: 10px 20px;
             cursor: pointer;
         }
+
+        #soundButton {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+        }
+
+        /* Дополнительный стиль для кнопки "PC" */
+        #pcButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div id="info">
+    <button id="pcButton">PC</button>
+    <div id="infoTelegram">
         <img src="tg.jpeg" id="telegramIcon" alt="Telegram Icon">:<span>@HelloBiden</span>
     </div>
-    <div id="info">
+    <div id="infoGitHub">
         <img src="git.png" id="githubIcon" alt="GitHub Icon">:<span>DimaProggramer</span>
     </div>
     <canvas id="canvas"></canvas>
     <div id="controls">
-        <input type="number" id="speedInput" placeholder="Enter speed" step="0.1" value="0.5">
-        <button id="applyButton">Apply Speed</button>
+        <input type="number" id="speedInput" placeholder="Введите скорость" step="0.1" value="0.5" min="0.5" max="35">
+        <button id="applyButton">Применить скорость</button>
+        <button id="restartButton">Перезапуск</button>
     </div>
-
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const speedInput = document.getElementById('speedInput');
-        const applyButton = document.getElementById('applyButton');
-
-        canvas.width = window.innerWidth;
-        canvas.height = (window.innerWidth) * 0.5625;
-
-        const square = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            size: 20,
-            dx: 0.5,
-            dy: 0.5,
-        };
-
-        function getRandomRGBColor() {
-            const r = Math.floor(Math.random() * 256);
-            const g = Math.floor(Math.random() * 256);
-            const b = Math.floor(Math.random() * 256);
-            return `rgb(${r},${g},${b})`;
-        }
-
-        function drawSquare() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = square.color;
-            ctx.fillRect(square.x, square.y, square.size, square.size);
-        }
-
-        function updatePosition() {
-            square.x += square.dx;
-            square.y += square.dy;
-
-            if (square.x + square.size > canvas.width || square.x < 0) {
-                square.dx = -square.dx;
-                square.color = getRandomRGBColor();
-            }
-
-            if (square.y + square.size > canvas.height || square.y < 0) {
-                square.dy = -square.dy;
-                square.color = getRandomRGBColor();
-            }
-
-            drawSquare();
-            requestAnimationFrame(updatePosition);
-        }
-
-        updatePosition();
-
-        applyButton.addEventListener('click', () => {
-            const speed = parseFloat(speedInput.value);
-
-            if (!isNaN(speed)) {
-                square.dx = speed;
-                square.dy = speed;
-            } else {
-                alert('Invalid speed value.');
-            }
-        });
+    <audio id="collisionSound" src="sound.mp3"></audio>
+    <script> const canvas = document.getElementById('canvas'); const ctx = canvas.getContext('2d'); const speedInput = document.getElementById('speedInput'); const applyButton = document.getElementById('applyButton'); const restartButton = document.getElementById('restartButton'); const pcButton = document.getElementById('pcButton'); const collisionSound = document.getElementById('collisionSound'); const soundButton = document.getElementById('soundButton'); const buttonHitboxSize = 100; pcButton.addEventListener('click', () => { const rescaleConfirmed = confirm('Вы на ПК? Изменить размер холста?'); if (rescaleConfirmed) { canvas.width = Math.round(window.innerWidth * 0.7); canvas.height = Math.round(window.innerWidth * 0.5); canvas.style.height = `${canvas.height}px`; canvas.style.width = `${canvas.width}px`; } }); canvas.width = window.innerWidth; canvas.height = Math.round(window.innerWidth * 0.5625); const square = { x: canvas.width / 2, y: canvas.height / 2, size: 20, dx: 0.5, dy: 0.5, }; function getRandomRGBColor() { const r = Math.floor(Math.random() * 256); const g = Math.floor(Math.random() * 256); const b = Math.floor(Math.random() * 256); return `rgb(${r},${g},${b})`; } function drawSquare() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = square.color; ctx.fillRect(square.x, square.y, square.size, square.size); } function updatePosition() { square.x += square.dx; square.y += square.dy; if (square.x + square.size > canvas.width || square.x < 0) { square.dx = -square.dx; square.color = getRandomRGBColor(); } if (square.y + square.size > canvas.height || square.y < 0) { square.dy = -square.dy; square.color = getRandomRGBColor(); } drawSquare(); requestAnimationFrame(updatePosition); } updatePosition(); applyButton.addEventListener('click', () => { const speed = parseFloat(speedInput.value); if (!isNaN(speed) && speed >= 0.5 && speed <= 35) { square.dx = speed; square.dy = speed; applyButton.disabled = true; collisionSound.play(); setTimeout(() => { applyButton.disabled = false; }, 500); } else { alert('invalid speed, please enter speed 0.5min n' 35max.'); } }); restartButton.addEventListener('click', () => { square.x = canvas.width / 2; square.y = canvas.height / 2; square.dx = parseFloat(speedInput.value); square.dy = parseFloat(speedInput.value); }); soundButton.addEventListener('click', () => { const buttonRect = soundButton.getBoundingClientRect(); const squareRect = canvas.getBoundingClientRect(); const buttonLeft = buttonRect.left - squareRect.left; const buttonRight = buttonRect.right - squareRect.left; const buttonTop = buttonRect.top - squareRect.top; const buttonBottom = buttonRect.bottom - squareRect.top; const squareCenterX = square.x + square.size / 2; const squareCenterY = square.y + square.size / 2; if ( squareCenterX > buttonLeft && squareCenterX < buttonRight && squareCenterY > buttonTop && squareCenterY < buttonBottom ) { collisionSound.play(); } });
     </script>
 </body>
 </html>
